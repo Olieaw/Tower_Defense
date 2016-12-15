@@ -1,6 +1,4 @@
-package ru.spbstu.icc.kspt.kuryakin;
-
-import ru.spbstu.icc.kspt.kuryakin.Level;
+package ru.spbstu.icc.kspt.kuryakin.Core;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,7 +28,7 @@ public class LevelFile {
             while (scanner.hasNext()){
                 level.map[x][y] = scanner.nextInt();
 
-                if (x < 22 - 1){
+                if (x < 14 - 1){
                     x++;
                 } else {
                     y++;

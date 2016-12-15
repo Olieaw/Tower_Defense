@@ -1,10 +1,10 @@
-package ru.spbstu.icc.kspt.kuryakin;
+package ru.spbstu.icc.kspt.kuryakin.Core;
 
 public class Level {
 
-    public int [][] map;
+    public static int [][] map;
 
-    SpawnPoint spawnPoint;
+    public static SpawnPoint spawnPoint;
 
     public void findSpawnPoint(){
         for (int x = 0; x < map.length; x++){

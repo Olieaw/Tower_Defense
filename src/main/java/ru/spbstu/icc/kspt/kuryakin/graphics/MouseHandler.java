@@ -1,13 +1,13 @@
-package ru.spbstu.icc.kspt.kuryakin.GUI;
+package ru.spbstu.icc.kspt.kuryakin.graphics;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-public class MouseHandler implements MouseListener, MouseMotionListener{
+public class MouseHandler implements MouseListener, MouseMotionListener {
 
-    private Screen screen;
-    private Screen.MouseHeld mouseHeld;
+    public Screen screen;
+    public Screen.MouseHeld mouseHeld;
 
     public MouseHandler(Screen screen) {
         this.screen = screen;
@@ -16,11 +16,13 @@ public class MouseHandler implements MouseListener, MouseMotionListener{
 
     public void mouseClicked(MouseEvent e) {
         System.out.println(e.getX() + " " + e.getY());
-
     }
 
     public void mousePressed(MouseEvent e) {
+
+        this.screen.delTower(e);
         this.mouseHeld.mouseDown(e);
+        this.screen.clicked(e);
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -40,6 +42,7 @@ public class MouseHandler implements MouseListener, MouseMotionListener{
     }
 
     public void mouseMoved(MouseEvent e) {
+
         this.mouseHeld.mouseMoved(e);
     }
 }
