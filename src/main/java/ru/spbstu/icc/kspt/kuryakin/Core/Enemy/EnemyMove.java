@@ -14,8 +14,6 @@ public class EnemyMove {
 
     public int health;
 
-    public boolean attack;
-
     public EnemyMove(Enemy enemy, SpawnPoint spawnPoint){
 
         this.enemy = enemy;
@@ -23,10 +21,9 @@ public class EnemyMove {
         this.routePosX = spawnPoint.getX();
         this.routePosY = spawnPoint.getY();
 
-        this.xPos = spawnPoint.getX();
-        this.yPos = spawnPoint.getY();
+        this.xPos = spawnPoint.getX() * 40;
+        this.yPos = spawnPoint.getY() * 40;
 
-        this.attack = false;
         this.health = enemy.health;
     }
 

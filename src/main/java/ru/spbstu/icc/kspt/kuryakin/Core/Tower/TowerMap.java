@@ -18,7 +18,7 @@ public class TowerMap {
 
             TowerMap.towerMap[x][y] = Tower.towerList[id];
 
-//            User.money -= TowerMap.towerMap[x][y].cost;
+            User.money -= TowerMap.towerMap[x][y].cost;
             return true;
         }
         return false;

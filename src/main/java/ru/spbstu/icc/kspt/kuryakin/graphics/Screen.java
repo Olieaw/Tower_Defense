@@ -23,9 +23,9 @@ public class Screen extends JPanel implements Runnable {
     public Map map;
     public TowerMap towerMap;
     public EnemyAI enemyAI;
-    public EnemyMove[] enemyMap ;
+    public EnemyMove[] enemyMap;
+
     public Wave wave;
-    public ClickedTower clickedTower;
 
     private Image[] terrain = new Image[25];
     private Image[] tower = new Image[10];
@@ -38,6 +38,7 @@ public class Screen extends JPanel implements Runnable {
     public static int towerSize = 1;
 
     private boolean mouseDown = false;
+    private boolean spawn = false;
     private int xTower = 0;
     private int yTower = 0;
 
@@ -70,11 +71,12 @@ public class Screen extends JPanel implements Runnable {
         paintTimeBar(graphics);
         paintHealthAndMoney(graphics);
         paintMenuTower(graphics);
+        paintGameOver(graphics);
     }
 
     private void paintMenuTower(Graphics graphics){
 
-        if(TowerMap.towerMap[xTower][yTower] != null) {
+        if(TowerMap.towerMap != null && TowerMap.towerMap[xTower][yTower] != null) {
             graphics.setColor(Color.GRAY);
             graphics.drawOval((xTower * towerSize) - (TowerMap.towerMap[xTower][yTower].range * 2 * towerSize + towerSize) / 2 + towerSize / 2,
                     (yTower * towerSize) - (TowerMap.towerMap[xTower][yTower].range * 2 * towerSize + towerSize) / 2 + towerSize / 2,
@@ -108,10 +110,12 @@ public class Screen extends JPanel implements Runnable {
 
     private void paintTimeBar(Graphics graphics){
         graphics.setColor(Color.BLACK);
-        graphics.drawRect(14*towerSize + 20, 2*towerSize + 10, 90, 20);
-        graphics.drawString("Старт", 14*towerSize + 48, 2*towerSize + 25);
-        graphics.drawRect(14*towerSize + 120, 2*towerSize + 10, 90, 20);
-        graphics.drawString("Стоп", 14*towerSize + 150, 2*towerSize + 25);
+        graphics.drawRect(14*towerSize + 20, 2*towerSize + 10, 190, 20);
+        if (spawn == false) {
+            graphics.drawString("Старт", 14 * towerSize + 100, 2 * towerSize + 25);
+        }else {
+            graphics.drawString("Стоп", 14 * towerSize + 100, 2 * towerSize + 25);
+        }
     }
 
     private void paintHealthAndMoney(Graphics graphics){
@@ -139,7 +143,7 @@ public class Screen extends JPanel implements Runnable {
 
         for (int x = 0; x < 14; x++) {
             for (int y = 0; y < 14; y++) {
-                if (TowerMap.towerMap[x][y] != null) {
+                if (TowerMap.towerMap != null && TowerMap.towerMap[x][y] != null) {
 
                     graphics.setColor(Color.GRAY);
                     graphics.drawImage(tower[TowerMap.towerMap[x][y].id], (x * towerSize) + 3, (y * towerSize) + 3, towerSize - 6, towerSize - 6, null);
@@ -167,13 +171,21 @@ public class Screen extends JPanel implements Runnable {
     }
 
     private void paintEnemy(Graphics graphics){
-        for (int x = 0; x < 5; x++) {
-            for (int y = 0; y < 2; y++) {
-                if (Enemy.enemyList[x + (y * 2)] != null){
-//                    graphics.drawImage(enemy[Enemy.enemyList[x + (y * 2)].id], SpawnPoint.getX() * towerSize, SpawnPoint.getY() * towerSize, towerSize, towerSize, null);
-
+        if (enemyMap != null) {
+            for (int i = 0; i < enemyMap.length; i++) {
+                if (enemyMap[i] != null) {
+                    graphics.drawImage(enemy[enemyMap[i].enemy.id], enemyMap[i].routePosX * towerSize, enemyMap[i].routePosY * towerSize, towerSize, towerSize, null);
+                    graphics.setColor(Color.RED);
+                    graphics.drawString(enemyMap[i].health + "", enemyMap[i].routePosX * towerSize + 12, enemyMap[i].routePosY * towerSize);
                 }
             }
+        }
+    }
+
+    private void paintGameOver(Graphics graphics){
+        if (user != null && user.gameOver() == true) {
+            graphics.setColor(new Color(255, 0, 0, 100));
+            graphics.fillRect(0, 0, this.frame.getWidth(), this.frame.getHeight());
         }
     }
 
@@ -184,7 +196,6 @@ public class Screen extends JPanel implements Runnable {
         this.towerMap = new TowerMap();
         this.enemyMap = new EnemyMove[200];
         this.wave = new Wave();
-        this.clickedTower = new ClickedTower();
 
         this.enemyAI = new EnemyAI(this.map);
 
@@ -219,8 +230,12 @@ public class Screen extends JPanel implements Runnable {
         while (true){
             repaint();
 
+            if (user.gameOver() == false) {
+                update();
+            }
+
             try {
-                Thread.sleep(2);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -230,9 +245,7 @@ public class Screen extends JPanel implements Runnable {
     public void enemyUpdate(){
         for (int i = 0; i < enemyMap.length; i++){
             if (enemyMap[i] != null){
-                if (!enemyMap[i].attack){
-//                    EnemyAI.moveAI.move(enemyMap[i]);
-                }
+                    EnemyAI.moveAI.move(enemyMap[i]);
 
                 enemyMap[i].update();
             }
@@ -241,33 +254,9 @@ public class Screen extends JPanel implements Runnable {
 
     public void update(){
         enemyUpdate();
-
-        if(wave.waveSpawning){
-            wave.spawnEnemies();
-        }
-    }
-
-    public void spawnEnemy(){
-        for (int i = 0; i < enemyMap.length; i++){
-            if(enemyMap[i] == null){
-                enemyMap[i] = new EnemyMove(Enemy.enemyList[0], Level.spawnPoint);
-                break;
-            }
-        }
-    }
-
-    public void placeTower(int x, int y){
-        int xPos = (x - 5)/ towerSize;
-        int yPos = (y - 28)/ towerSize;
-
-        if (xPos >= 0 && xPos < 14 && yPos >= 0 && yPos < 14){
-
-            if( TowerMap.towerMap[xPos][yPos] == null && map.map[xPos][yPos] == 0){
-                user.money -= Tower.towerList[hand - 1].cost;
-
-                TowerMap.towerMap[xPos][yPos] = Tower.towerList[hand - 1];
-            }
-        }
+        fire();
+        diedEnemy();
+        this.wave.spawnEnemies(this.enemyMap, spawn);
     }
 
     public class MouseHeld{
@@ -301,9 +290,13 @@ public class Screen extends JPanel implements Runnable {
 
         public void mouseDown(MouseEvent e) {
             mouseDown = true;
-            if (hand != 0){
-                placeTower(e.getX(), e.getY());
 
+            int xPos = (e.getX() - 5)/ towerSize;
+            int yPos = (e.getY() - 28)/ towerSize;
+
+            if (hand != 0){
+
+                towerMap.AddTower(xPos, yPos, hand - 1);
                 hand = 0;
             }
             updateMouse(e);
@@ -328,11 +321,43 @@ public class Screen extends JPanel implements Runnable {
     }
 
     public void delTower(MouseEvent e){
-        int xPos = (e.getX() - 5)/ towerSize;
-        int yPos = (e.getY() - 28)/ towerSize;
-
         if ((e.getX() >= 585) && (e.getX() <= 705) && (e.getY() >= 238) && (e.getY() <= 258)) {
             towerMap.DeleteTower(xTower, yTower);
+        }
+    }
+
+    public void spawnButton(MouseEvent e){
+        if((e.getX() >= 585) && (e.getX() <= 775) && (e.getY() >= 118) && (e.getY() <= 138)){
+            spawn = !spawn;
+        }
+    }
+
+    public void fire(){
+        for (int x = 0; x < 14; x++) {
+            for (int y = 0; y < 14; y++) {
+                if (towerMap.towerMap != null && towerMap.towerMap[y][x] != null &&
+                        enemyMap != null){
+                    for (int i = 0; i < enemyMap.length; i++){
+                        if(enemyMap[i] != null &&
+                                enemyMap[i].routePosX >= (y - towerMap.towerMap[y][x].range) &&
+                                enemyMap[i].routePosX <= (y + towerMap.towerMap[y][x].range) &&
+                                enemyMap[i].routePosY >= (x - towerMap.towerMap[y][x].range) &&
+                                enemyMap[i].routePosY <= (x + towerMap.towerMap[y][x].range)){
+                            enemyMap[i].health -= towerMap.towerMap[y][x].damage;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void diedEnemy(){
+        for (int i = 0; i < enemyMap.length; i++) {
+            if (enemyMap[i] != null && enemyMap[i].health <= 0) {
+                User.money += 10;
+                enemyMap[i] = null;
+            }
         }
     }
 }

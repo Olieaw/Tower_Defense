@@ -1,46 +1,34 @@
 package ru.spbstu.icc.kspt.kuryakin.Core;
 
+import ru.spbstu.icc.kspt.kuryakin.Core.Enemy.Enemy;
+import ru.spbstu.icc.kspt.kuryakin.Core.Enemy.EnemyMove;
+
 public class Wave {
 
     int waveNumber = 0;
     int enemiesThisRound = 0;
     int enemiesPerRound = 10;
 
-    public boolean  waveSpawning;
+    private int currentDelay = 10;
+    private int spawnRate = 10;
 
-    public Wave(){
+    public void spawnEnemies(EnemyMove[] enemyMap, boolean spawn) {
 
-    }
-
-    public void nextWave(){
-        this.waveNumber++;
-        this.enemiesThisRound = 0;
-        this.waveSpawning = true;
-
-        System.out.println("[Wave] Wave " + this.waveNumber + " incomming!");
-
-//        for (int i = 0; i < this.screen.enemyMap.length; i++){
-//            this.screen.enemyMap[i] = null;
-//        }
-    }
-
-    private int currentDelay = 0;
-    private int spawnRate = 1000;
-
-    public void spawnEnemies(){
-        if (this.enemiesThisRound < this.waveNumber * this.enemiesPerRound){
-            if (currentDelay < spawnRate){
+        if (spawn == true) {
+            if (currentDelay < spawnRate) {
                 currentDelay++;
-            }else{
+            } else {
                 currentDelay = 0;
-
-                System.out.println("[Wave] Enemy Spawner");
-
-                this.enemiesThisRound++;
-//                this.screen.spawnEnemy();
+                if (enemiesPerRound > enemiesThisRound) {
+                    if (enemiesThisRound > (enemiesPerRound / 2)) {
+                        enemyMap[enemiesThisRound] = new EnemyMove(Enemy.enemyList[0], Level.spawnPoint);
+                        enemiesThisRound++;
+                    } else {
+                        enemyMap[enemiesThisRound] = new EnemyMove(Enemy.enemyList[1], Level.spawnPoint);
+                        enemiesThisRound++;
+                    }
+                }
             }
-        }else {
-            this.waveSpawning = false;
         }
     }
 }

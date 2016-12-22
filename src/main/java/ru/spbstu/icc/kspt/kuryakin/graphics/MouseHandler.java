@@ -15,11 +15,12 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     }
 
     public void mouseClicked(MouseEvent e) {
-        System.out.println(e.getX() + " " + e.getY());
+//        System.out.println(e.getX() + " " + e.getY());
     }
 
     public void mousePressed(MouseEvent e) {
 
+        this.screen.spawnButton(e);
         this.screen.delTower(e);
         this.mouseHeld.mouseDown(e);
         this.screen.clicked(e);

@@ -8,4 +8,11 @@ public class User {
         health = 100;
         money = 300;
     }
+
+    public boolean gameOver(){
+        if (health < 1){
+            return true;
+        }
+        return false;
+    }
 }
